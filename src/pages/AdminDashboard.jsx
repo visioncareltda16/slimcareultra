@@ -240,9 +240,6 @@ export function AdminDashboard() {
                             <td className="py-1 text-brand-gray">{req.medico_nome || req.medico || '-'}</td>
                             <td className="py-1 text-right">
                               <div className="flex items-center justify-end gap-1">
-                                <button onClick={() => handlePromoteAdmin(req.uid)} className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-[10px] uppercase font-bold flex items-center gap-1" title="Promover a Admin">
-                                  <ArrowUpRight className="w-3 h-3 text-brand-gold" />
-                                </button>
                                 <button onClick={() => handleSuspend(req.uid, 'paciente')} className="p-1.5 rounded bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[10px] uppercase font-bold flex items-center gap-1" title="Inativar">
                                   <XCircle className="w-3 h-3" />
                                 </button>
