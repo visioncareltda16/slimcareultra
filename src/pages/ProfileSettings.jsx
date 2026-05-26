@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { User, Mail, Save, Loader2, ShieldAlert, Camera, Key } from 'lucide-react';
 import { db, auth } from '../lib/firebase';
 import { doc, getDoc, setDoc, collection, getDocs, query, where } from 'firebase/firestore';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail, signOut } from 'firebase/auth';
 
 export function ProfileSettings({ currentUser, userRole }) {
   const [loading, setLoading] = useState(true);
@@ -272,11 +272,20 @@ export function ProfileSettings({ currentUser, userRole }) {
             </>
           )}
 
-          <div className="pt-6 border-t border-white/5 mt-2 flex justify-end">
+          <div className="pt-6 border-t border-white/5 mt-2 flex flex-col md:flex-row justify-between items-center gap-4">
+            <button 
+              type="button" 
+              onClick={() => signOut(auth)}
+              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg font-semibold transition-colors w-full md:w-auto"
+            >
+              <LogOut className="w-4 h-4" />
+              Sair do Aplicativo
+            </button>
+
             <button 
               type="submit" 
               disabled={saving || userRole === 'admin'} 
-              className="flex items-center gap-2 px-6 py-2.5 bg-brand-blue hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-brand-blue hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 w-full md:w-auto"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Salvar Alterações
