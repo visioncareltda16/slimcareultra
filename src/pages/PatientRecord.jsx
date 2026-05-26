@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Target, Activity, Zap, Loader2, Pill, Save, Sparkles, X, Bell } from 'lucide-react';
+import { ArrowLeft, Target, Activity, Zap, Loader2, Pill, Save, Sparkles, X, Bell, FileText, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import { db } from '../lib/firebase';
 import { collection, query, where, getDocs, orderBy, getDoc, doc, setDoc, addDoc } from 'firebase/firestore';
@@ -31,6 +31,8 @@ export function PatientRecord({ patient, onBack }) {
   const [examesPendentes, setExamesPendentes] = useState([]);
   const [newExameAvulso, setNewExameAvulso] = useState('');
   const [savingExames, setSavingExames] = useState(false);
+  const [examesEnviados, setExamesEnviados] = useState([]);
+  const [fotos, setFotos] = useState([]);
 
   // AI Report State
   const [iaReport, setIaReport] = useState(null);
@@ -84,6 +86,20 @@ export function PatientRecord({ patient, onBack }) {
         let alertasData = snapAlertas.docs.map(d => d.data());
         alertasData.sort((a, b) => new Date(b.data) - new Date(a.data));
         setAlertas(alertasData);
+
+        // Fotos
+        const qFotos = query(collection(db, 'pacientes_fotos'), where('pacienteId', '==', patient.uid));
+        const snapFotos = await getDocs(qFotos);
+        let fotosData = snapFotos.docs.map(d => ({ id: d.id, ...d.data() }));
+        fotosData.sort((a, b) => new Date(b.data) - new Date(a.data));
+        setFotos(fotosData);
+
+        // Exames Enviados
+        const qExames = query(collection(db, 'pacientes_exames'), where('pacienteId', '==', patient.uid));
+        const snapExamesUploads = await getDocs(qExames);
+        let examesData = snapExamesUploads.docs.map(d => ({ id: d.id, ...d.data() }));
+        examesData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setExamesEnviados(examesData);
 
       } catch (error) {
         console.error("Erro ao carregar prontuário:", error);
@@ -581,6 +597,60 @@ export function PatientRecord({ patient, onBack }) {
               )}
             </div>
           </div>
+        </div>
+      </div>
+      {/* Arquivos do Paciente (Fotos e Exames) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="glass-card p-6 flex flex-col">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl bg-brand-gold/10 text-brand-gold"><ImageIcon className="w-5 h-5" /></div>
+            <h3 className="font-semibold">Evolução Fotográfica</h3>
+          </div>
+          {fotos.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center py-8">
+              <p className="text-sm text-brand-gray">Nenhuma foto enviada.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+              {fotos.map(foto => (
+                <div key={foto.id} className="relative group rounded-xl overflow-hidden aspect-[3/4] border border-white/10 bg-black/50">
+                  <img src={foto.url} alt="Evolução" className="w-full h-full object-cover" />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-2 pt-6">
+                    <span className="text-[10px] font-medium text-white">{new Date(foto.data).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="glass-card p-6 flex flex-col">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl bg-brand-turquoise/10 text-brand-turquoise"><FileText className="w-5 h-5" /></div>
+            <h3 className="font-semibold">Exames e Laudos Anexados</h3>
+          </div>
+          {examesEnviados.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center py-8">
+              <p className="text-sm text-brand-gray">Nenhum exame anexado.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+              {examesEnviados.map(exame => (
+                <div key={exame.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-4 h-4 text-brand-turquoise" />
+                    <div>
+                      <p className="text-xs font-medium line-clamp-1">{exame.nomeArquivo}</p>
+                      <p className="text-[10px] text-brand-gray">{new Date(exame.createdAt).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                  </div>
+                  <a href={exame.url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md bg-black/40 hover:bg-black/60 text-brand-gray hover:text-white transition-colors" title="Abrir PDF">
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

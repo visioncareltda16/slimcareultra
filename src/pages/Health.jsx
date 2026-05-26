@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Scale, Info, Loader2, Save, Activity } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, addDoc, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { PhotoGallery } from '../components/patient/PhotoGallery';
+import { ExamsManager } from '../components/patient/ExamsManager';
 
 export function Health({ currentUser }) {
   const [peso, setPeso] = useState('');
@@ -235,6 +237,13 @@ export function Health({ currentUser }) {
           )}
         </div>
       </div>
+
+      {/* New Row: Photo Gallery and Exams */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <PhotoGallery currentUser={currentUser} />
+        <ExamsManager currentUser={currentUser} />
+      </div>
+
     </div>
   );
 }
