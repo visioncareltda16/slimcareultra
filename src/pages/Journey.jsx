@@ -150,7 +150,7 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
     }));
   };
 
-  const registrarAplicacao = () => {
+  const registrarAplicacao = async () => {
     if (!protocolo) {
       alert("Nenhum protocolo cadastrado pelo médico.");
       return;
@@ -159,14 +159,60 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
       alert("Informe a dose aplicada.");
       return;
     }
+    
+    const newAplicacoes = [{ medicamento: protocolo.medicamento, dose: customDose }];
+    
     setDayData(prev => ({
       ...prev,
-      aplicacoes: [{ medicamento: protocolo.medicamento, dose: customDose }]
+      aplicacoes: newAplicacoes
     }));
+
+    // Auto-save instantly to avoid user losing data by not clicking "Salvar Registros"
+    if (selectedDate && targetUid && !readOnly) {
+      try {
+        const docId = `${targetUid}_${selectedDate}`;
+        await setDoc(doc(db, 'calendario_eventos', docId), { 
+          aplicacoes: newAplicacoes,
+          pacienteId: targetUid,
+          data: selectedDate,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+        
+        setEvents(prev => ({
+          ...prev,
+          [selectedDate]: {
+            ...(prev[selectedDate] || {}),
+            aplicacoes: newAplicacoes
+          }
+        }));
+      } catch (e) {
+        console.error("Erro ao auto-salvar aplicação:", e);
+      }
+    }
   };
 
-  const removerAplicacao = () => {
+  const removerAplicacao = async () => {
     setDayData(prev => ({ ...prev, aplicacoes: [] }));
+    
+    if (selectedDate && targetUid && !readOnly) {
+      try {
+        const docId = `${targetUid}_${selectedDate}`;
+        await setDoc(doc(db, 'calendario_eventos', docId), { 
+          aplicacoes: [],
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+        
+        setEvents(prev => ({
+          ...prev,
+          [selectedDate]: {
+            ...(prev[selectedDate] || {}),
+            aplicacoes: []
+          }
+        }));
+      } catch (e) {
+        console.error("Erro ao remover aplicação:", e);
+      }
+    }
   };
 
   const saveDay = async () => {
