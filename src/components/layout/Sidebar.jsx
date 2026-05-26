@@ -88,6 +88,15 @@ export function Sidebar({ activeTab, setActiveTab, userRole, onLogout }) {
           )} />
           <span className="text-[10px] lg:text-sm font-medium">Meu Perfil</span>
         </button>
+
+        {/* Mobile Logout Button */}
+        <button 
+          onClick={onLogout}
+          className="md:hidden flex flex-col items-center justify-center gap-1 p-2 rounded-xl text-brand-gray hover:text-red-400 mt-2"
+        >
+          <LogOut className="w-6 h-6 transition-all" />
+          <span className="text-[10px] font-medium">Sair</span>
+        </button>
       </div>
       
       {/* User Profile Mini */}
