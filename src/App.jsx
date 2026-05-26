@@ -81,8 +81,13 @@ function App() {
   const renderContent = () => {
     if (activeTab === 'profile') return <ProfileSettings currentUser={currentUser} userRole={userRole} />;
     
-    if (userRole === 'admin') return <AdminDashboard />;
+    if (activeTab === 'admin_dashboard' && (userRole === 'admin' || currentUser?.isAdmin)) {
+      return <AdminDashboard />;
+    }
+
     if (userRole === 'medico') return <DoctorDashboard currentUser={currentUser} />;
+    
+    if (userRole === 'admin' && !currentUser?.isAdmin) return <AdminDashboard />;
 
     // Navigation for Patients
     switch (activeTab) {
@@ -97,7 +102,8 @@ function App() {
 
   const getHeaderTitle = () => {
     if (activeTab === 'profile') return 'Meu Perfil';
-    if (userRole === 'admin') return 'Painel Administrativo';
+    if (activeTab === 'admin_dashboard') return 'Painel Administrativo';
+    if (userRole === 'admin' && !currentUser?.isAdmin) return 'Painel Administrativo';
     if (userRole === 'medico') return 'Portal do Médico';
 
     const titles = {
@@ -116,7 +122,7 @@ function App() {
         <Landing onLogin={handleLogin} />
       ) : (
         <>
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} onLogout={handleLogout} />
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} currentUser={currentUser} onLogout={handleLogout} />
           
           <main className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative">
           <Header 

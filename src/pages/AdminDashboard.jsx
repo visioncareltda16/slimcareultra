@@ -92,14 +92,14 @@ export function AdminDashboard() {
     }
   };
 
-  const handlePromoteAdmin = async (uid) => {
-    if(!window.confirm("Tem certeza que deseja promover este usuário a Administrador? Ele terá acesso total ao painel.")) return;
+  const handleToggleAdmin = async (uid, currentIsAdmin) => {
+    const action = currentIsAdmin ? 'remover os privilégios de' : 'conceder privilégios de';
+    if(!window.confirm(`Tem certeza que deseja ${action} Administrador para este médico? Ele continuará com o Portal Médico ativo.`)) return;
     try {
-      await updateDoc(doc(db, 'users', uid), { role: 'admin' });
-      setApprovedDoctors(prev => prev.filter(req => req.uid !== uid));
-      setApprovedPatients(prev => prev.filter(req => req.uid !== uid));
+      await updateDoc(doc(db, 'users', uid), { isAdmin: !currentIsAdmin });
+      setApprovedDoctors(prev => prev.map(d => d.uid === uid ? { ...d, isAdmin: !currentIsAdmin } : d));
     } catch (error) {
-      console.error("Error promoting user: ", error);
+      console.error("Error updating admin status: ", error);
     }
   };
 
@@ -284,8 +284,8 @@ export function AdminDashboard() {
                             <td className="py-1 text-brand-gray text-[10px] uppercase">{(req.especialidades || []).join(', ')}</td>
                             <td className="py-1 text-right">
                               <div className="flex items-center justify-end gap-1">
-                                <button onClick={() => handlePromoteAdmin(req.uid)} className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-[10px] uppercase font-bold flex items-center gap-1" title="Promover a Admin">
-                                  <ArrowUpRight className="w-3 h-3 text-brand-gold" />
+                                <button onClick={() => handleToggleAdmin(req.uid, req.isAdmin)} className={`p-1.5 rounded hover:bg-white/10 text-[10px] uppercase font-bold flex items-center gap-1 transition-colors ${req.isAdmin ? 'bg-brand-gold/10 text-brand-gold' : 'bg-white/5 text-brand-gray'}`} title={req.isAdmin ? "Remover Administrador" : "Promover a Admin"}>
+                                  <ArrowUpRight className="w-3 h-3" />
                                 </button>
                                 <button onClick={() => handleSuspend(req.uid, 'medico')} className="p-1.5 rounded bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-[10px] uppercase font-bold flex items-center gap-1" title="Inativar">
                                   <XCircle className="w-3 h-3" />

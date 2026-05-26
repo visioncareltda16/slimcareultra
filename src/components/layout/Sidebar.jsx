@@ -1,7 +1,7 @@
-import { LayoutDashboard, Syringe, Activity, CalendarHeart, Sparkles, LogOut, UserCog } from 'lucide-react';
+import { LayoutDashboard, Syringe, Activity, CalendarHeart, Sparkles, LogOut, UserCog, ShieldAlert } from 'lucide-react';
 import clsx from 'clsx';
 
-export function Sidebar({ activeTab, setActiveTab, userRole, onLogout }) {
+export function Sidebar({ activeTab, setActiveTab, userRole, currentUser, onLogout }) {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'treatment', label: 'Tratamento', icon: Syringe },
@@ -56,6 +56,22 @@ export function Sidebar({ activeTab, setActiveTab, userRole, onLogout }) {
               activeTab === 'dashboard' && "text-brand-blue drop-shadow-[0_0_8px_rgba(50,173,230,0.5)]"
             )} />
             <span className="text-[10px] lg:text-sm font-medium">Painel Inicial</span>
+          </button>
+        )}
+
+        {(userRole === 'admin' || currentUser?.isAdmin) && (
+          <button
+            onClick={() => setActiveTab('admin_dashboard')}
+            className={clsx(
+              "flex flex-col lg:flex-row items-center lg:justify-start gap-1 lg:gap-3 p-2 lg:px-4 lg:py-3 rounded-xl hover:bg-white/5 w-full transition-all group",
+              activeTab === 'admin_dashboard' ? "text-white" : "text-brand-gray"
+            )}
+          >
+            <ShieldAlert className={clsx(
+              "w-6 h-6 lg:w-5 lg:h-5 transition-all group-hover:scale-110",
+              activeTab === 'admin_dashboard' && "text-brand-gold drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]"
+            )} />
+            <span className="text-[10px] lg:text-sm font-medium">Administração</span>
           </button>
         )}
 
