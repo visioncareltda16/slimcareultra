@@ -32,7 +32,6 @@ export function PatientRecord({ patient, onBack }) {
   const [newExameAvulso, setNewExameAvulso] = useState('');
   const [savingExames, setSavingExames] = useState(false);
   const [examesEnviados, setExamesEnviados] = useState([]);
-  const [fotos, setFotos] = useState([]);
 
   // AI Report State
   const [iaReport, setIaReport] = useState(null);
@@ -54,7 +53,6 @@ export function PatientRecord({ patient, onBack }) {
         const pProtocolo = getDoc(doc(db, 'protocolos_tratamento', pUid));
         const pPaineis = getDoc(doc(db, 'configuracoes_clinica', 'exames_paineis'));
         const qAlertas = query(collection(db, 'alertas_medicos'), where('pacienteId', '==', pUid));
-        const qFotos = query(collection(db, 'pacientes_fotos'), where('pacienteId', '==', pUid));
         const qExames = query(collection(db, 'pacientes_exames'), where('pacienteId', '==', pUid));
 
         // Execute all in parallel
@@ -64,7 +62,6 @@ export function PatientRecord({ patient, onBack }) {
           docProtocolo,
           docPaineis,
           snapAlertas,
-          snapFotos,
           snapExamesUploads
         ] = await Promise.all([
           getDocs(qEvolucao),
@@ -72,7 +69,6 @@ export function PatientRecord({ patient, onBack }) {
           pProtocolo,
           pPaineis,
           getDocs(qAlertas),
-          getDocs(qFotos),
           getDocs(qExames)
         ]);
 
@@ -102,11 +98,6 @@ export function PatientRecord({ patient, onBack }) {
         let alertasData = snapAlertas.docs.map(d => d.data());
         alertasData.sort((a, b) => new Date(b.data) - new Date(a.data));
         setAlertas(alertasData);
-
-        // Process Fotos
-        let fotosData = snapFotos.docs.map(d => ({ id: d.id, ...d.data() }));
-        fotosData.sort((a, b) => new Date(b.data) - new Date(a.data));
-        setFotos(fotosData);
 
         // Process Exames
         let examesData = snapExamesUploads.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -611,30 +602,9 @@ export function PatientRecord({ patient, onBack }) {
           </div>
         </div>
       </div>
-      {/* Arquivos do Paciente (Fotos e Exames) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="glass-card p-6 flex flex-col">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-xl bg-brand-gold/10 text-brand-gold"><ImageIcon className="w-5 h-5" /></div>
-            <h3 className="font-semibold">Evolução Fotográfica</h3>
-          </div>
-          {fotos.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center py-8">
-              <p className="text-sm text-brand-gray">Nenhuma foto enviada.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
-              {fotos.map(foto => (
-                <div key={foto.id} className="relative group rounded-xl overflow-hidden aspect-[3/4] border border-white/10 bg-black/50">
-                  <img src={foto.url} alt="Evolução" className="w-full h-full object-cover" />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-2 pt-6">
-                    <span className="text-[10px] font-medium text-white">{new Date(foto.data).toLocaleDateString('pt-BR')}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      {/* Arquivos do Paciente (Exames) */}
+      <div className="grid grid-cols-1 gap-6 mb-6">
+
 
         <div className="glass-card p-6 flex flex-col">
           <div className="flex items-center gap-3 mb-6">
