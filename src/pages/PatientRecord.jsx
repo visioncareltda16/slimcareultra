@@ -692,7 +692,7 @@ export function PatientRecord({ patient, onBack }) {
       <div className="mt-4 pt-8 border-t border-white/10">
         <h2 className="text-xl font-bold mb-6">Diário Clínico do Paciente</h2>
         <div className="glass-card p-2 md:p-6 bg-black/40">
-          <Journey patientId={patient.uid} readOnly={true} />
+          <Journey patientId={patient.uid} readOnly={false} />
         </div>
       </div>
     </div>
