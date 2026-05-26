@@ -46,57 +46,69 @@ export function PatientRecord({ patient, onBack }) {
   useEffect(() => {
     const fetchPatientData = async () => {
       try {
-        // Evolução
-        const q = query(
-          collection(db, 'pacientes_evolucoes'),
-          where('pacienteId', '==', patient.uid)
-        );
-        const snap = await getDocs(q);
+        const pUid = patient.uid;
         
-        // Sort locally to avoid Firestore index error
-        let histData = snap.docs.map(d => d.data()).filter(d => d.data);
+        // Prepare queries
+        const qEvolucao = query(collection(db, 'pacientes_evolucoes'), where('pacienteId', '==', pUid));
+        const pCadastro = getDoc(doc(db, 'pacientes_cadastros', pUid));
+        const pProtocolo = getDoc(doc(db, 'protocolos_tratamento', pUid));
+        const pPaineis = getDoc(doc(db, 'configuracoes_clinica', 'exames_paineis'));
+        const qAlertas = query(collection(db, 'alertas_medicos'), where('pacienteId', '==', pUid));
+        const qFotos = query(collection(db, 'pacientes_fotos'), where('pacienteId', '==', pUid));
+        const qExames = query(collection(db, 'pacientes_exames'), where('pacienteId', '==', pUid));
+
+        // Execute all in parallel
+        const [
+          snapEvolucao,
+          docCadastro,
+          docProtocolo,
+          docPaineis,
+          snapAlertas,
+          snapFotos,
+          snapExamesUploads
+        ] = await Promise.all([
+          getDocs(qEvolucao),
+          pCadastro,
+          pProtocolo,
+          pPaineis,
+          getDocs(qAlertas),
+          getDocs(qFotos),
+          getDocs(qExames)
+        ]);
+
+        // Process Evolução
+        let histData = snapEvolucao.docs.map(d => d.data()).filter(d => d.data);
         histData.sort((a, b) => new Date(a.data) - new Date(b.data));
         setHistorico(histData);
 
-        // Dados Clínicos (Meta & Exames Pendentes)
-        const pDoc = await getDoc(doc(db, 'pacientes_cadastros', patient.uid));
-        if (pDoc.exists()) {
-          if (pDoc.data().metaPeso) setMetaPeso(pDoc.data().metaPeso);
-          if (pDoc.data().exames_pendentes) setExamesPendentes(pDoc.data().exames_pendentes);
+        // Process Dados Clínicos
+        if (docCadastro.exists()) {
+          const cData = docCadastro.data();
+          if (cData.metaPeso) setMetaPeso(cData.metaPeso);
+          if (cData.exames_pendentes) setExamesPendentes(cData.exames_pendentes);
         }
 
-        // Protocolo
-        const protDoc = await getDoc(doc(db, 'protocolos_tratamento', patient.uid));
-        if (protDoc.exists()) {
-          setProtocolo(protDoc.data());
+        // Process Protocolo
+        if (docProtocolo.exists()) {
+          setProtocolo(docProtocolo.data());
         }
 
-        // Painéis de Exames
-        const snapExames = await getDoc(doc(db, 'configuracoes_clinica', 'exames_paineis'));
-        if (snapExames.exists() && snapExames.data().lista) {
-          setPaineisDisponiveis(snapExames.data().lista);
+        // Process Painéis
+        if (docPaineis.exists() && docPaineis.data().lista) {
+          setPaineisDisponiveis(docPaineis.data().lista);
         }
 
-        // Alertas Médicos
-        const qAlertas = query(
-          collection(db, 'alertas_medicos'),
-          where('pacienteId', '==', patient.uid)
-        );
-        const snapAlertas = await getDocs(qAlertas);
+        // Process Alertas
         let alertasData = snapAlertas.docs.map(d => d.data());
         alertasData.sort((a, b) => new Date(b.data) - new Date(a.data));
         setAlertas(alertasData);
 
-        // Fotos
-        const qFotos = query(collection(db, 'pacientes_fotos'), where('pacienteId', '==', patient.uid));
-        const snapFotos = await getDocs(qFotos);
+        // Process Fotos
         let fotosData = snapFotos.docs.map(d => ({ id: d.id, ...d.data() }));
         fotosData.sort((a, b) => new Date(b.data) - new Date(a.data));
         setFotos(fotosData);
 
-        // Exames Enviados
-        const qExames = query(collection(db, 'pacientes_exames'), where('pacienteId', '==', patient.uid));
-        const snapExamesUploads = await getDocs(qExames);
+        // Process Exames
         let examesData = snapExamesUploads.docs.map(d => ({ id: d.id, ...d.data() }));
         examesData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setExamesEnviados(examesData);

@@ -16,6 +16,7 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
   const [dayData, setDayData] = useState({ sintomas: [], aplicacoes: [], notas: '', exames: [], peso: '', altura: '' });
   const [saving, setSaving] = useState(false);
   const [examesPendentesGlobais, setExamesPendentesGlobais] = useState([]);
+  const [customDose, setCustomDose] = useState('');
   
   // Protocolo from Treatment
   const [protocolo, setProtocolo] = useState(null);
@@ -128,6 +129,7 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
     }
     
     setDayData(initialData);
+    setCustomDose(protocolo?.dose || '');
   };
 
   const toggleSintoma = (s) => {
@@ -153,9 +155,13 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
       alert("Nenhum protocolo cadastrado pelo médico.");
       return;
     }
+    if (!customDose.trim()) {
+      alert("Informe a dose aplicada.");
+      return;
+    }
     setDayData(prev => ({
       ...prev,
-      aplicacoes: [{ medicamento: protocolo.medicamento, dose: protocolo.dose }]
+      aplicacoes: [{ medicamento: protocolo.medicamento, dose: customDose }]
     }));
   };
 
@@ -367,14 +373,28 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
                         {dayData.aplicacoes[0].dose}
                       </span>
                     </div>
-                    <button onClick={removerAplicacao} className="text-xs text-red-400 hover:text-red-300 underline">Desfazer</button>
+                    {!readOnly && <button onClick={removerAplicacao} className="text-xs text-red-400 hover:text-red-300 underline">Desfazer</button>}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-start gap-3">
+                  <div className="flex flex-col gap-3">
                     <p className="text-sm text-brand-gray">Nenhuma aplicação registrada hoje.</p>
-                    <button onClick={registrarAplicacao} className="px-4 py-2 bg-brand-blue/20 text-brand-blue rounded-xl text-sm font-semibold hover:bg-brand-blue/30 transition-all">
-                      Registrar Dose de {protocolo ? protocolo.medicamento : 'Hoje'}
-                    </button>
+                    {!readOnly && protocolo && (
+                      <div className="flex items-end gap-2 mt-2">
+                        <div className="flex-1">
+                          <label className="text-[10px] text-brand-gray uppercase tracking-widest mb-1 block">Dose Aplicada</label>
+                          <input 
+                            type="text" 
+                            value={customDose} 
+                            onChange={e => setCustomDose(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-brand-blue text-sm" 
+                            placeholder="Ex: 2.5mg"
+                          />
+                        </div>
+                        <button onClick={registrarAplicacao} className="px-4 py-2 bg-brand-blue/20 text-brand-blue rounded-lg text-sm font-semibold hover:bg-brand-blue/30 transition-all whitespace-nowrap">
+                          Registrar
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -42,25 +42,32 @@ export function DoctorDashboard({ currentUser }) {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
 
-        for (const p of snapshot.docs) {
-          // Check if user is approved
+        const patientPromises = snapshot.docs.map(async (p) => {
           const userDoc = await getDoc(doc(db, 'users', p.id));
-          if (userDoc.exists() && userDoc.data().status === 'approved') {
-            const patData = { uid: p.id, ...p.data(), hasAlert: false };
-            
-            // Check for recent symptoms (filtering locally to avoid missing Firestore index errors)
-            const evtQ = query(collection(db, 'calendario_eventos'), where('pacienteId', '==', p.id));
-            const evtSnap = await getDocs(evtQ);
-            evtSnap.forEach(e => {
-              const data = e.data();
-              if (data.data >= sevenDaysAgoStr && data.sintomas && data.sintomas.length > 0) {
-                patData.hasAlert = true;
-              }
-            });
-
-            patientsList.push(patData);
+          if (!userDoc.exists() || userDoc.data().status !== 'approved') {
+            return null;
           }
-        }
+
+          const patData = { uid: p.id, ...p.data(), hasAlert: false };
+          
+          const evtQ = query(collection(db, 'calendario_eventos'), where('pacienteId', '==', p.id));
+          const evtSnap = await getDocs(evtQ);
+          
+          evtSnap.forEach(e => {
+            const data = e.data();
+            if (data.data >= sevenDaysAgoStr && data.sintomas && data.sintomas.length > 0) {
+              patData.hasAlert = true;
+            }
+          });
+
+          return patData;
+        });
+
+        const resolvedPatients = await Promise.all(patientPromises);
+        resolvedPatients.forEach(p => {
+          if (p) patientsList.push(p);
+        });
+
         patientsList.sort((a, b) => (a.nome || a.name || '').localeCompare(b.nome || b.name || ''));
         setPatients(patientsList);
       } catch (error) {
