@@ -9,9 +9,9 @@
   --color-brand-turquoise: #30D158;
   --color-brand-gold: #D4AF37;
   --color-brand-gray: #8E8E93;
-  --font-sans: "Open Sans", sans-serif;
-  --font-brand: "Open Sans", sans-serif;
-  --font-serif-brand: "Open Sans", sans-serif;
+  --font-sans: "Outfit", sans-serif;
+  --font-brand: "Outfit", sans-serif;
+  --font-serif-brand: "Playfair Display", serif;
 }
 
 @layer base {
