@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Save, Loader2, ShieldAlert, Camera, Key } from 'lucide-react';
+import { User, Mail, Save, Loader2, ShieldAlert, Camera, Key, LogOut } from 'lucide-react';
 import { db, auth } from '../lib/firebase';
 import { doc, getDoc, setDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { sendPasswordResetEmail, signOut } from 'firebase/auth';
