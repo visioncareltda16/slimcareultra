@@ -402,6 +402,14 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
                     />
                   </div>
                 </div>
+
+                {!readOnly && (
+                  <div className="flex justify-end mt-4">
+                    <button onClick={saveDay} disabled={saving} className="px-5 py-2 bg-brand-blue/20 text-brand-blue rounded-lg text-xs font-bold hover:bg-brand-blue/30 transition-all flex items-center gap-2 disabled:opacity-50">
+                      {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Registrar'}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Medicamento Card */}
@@ -447,9 +455,16 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
 
               {/* Exames Card */}
               <div className="glass-card p-5 bg-[#1a1a1f] border-white/5">
-                <div className="flex items-center gap-2 mb-3 text-purple-400">
-                  <Activity className="w-4 h-4" />
-                  <span className="text-sm font-semibold uppercase tracking-wider">Exames Solicitados</span>
+                <div className="flex items-center justify-between mb-3 text-purple-400">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4" />
+                    <span className="text-sm font-semibold uppercase tracking-wider">Exames Solicitados</span>
+                  </div>
+                  {!readOnly && (
+                    <button onClick={saveDay} disabled={saving} className="px-4 py-1.5 bg-purple-500/20 text-purple-400 rounded-lg text-xs font-bold hover:bg-purple-500/30 transition-all flex items-center gap-2 disabled:opacity-50">
+                      {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Registrar'}
+                    </button>
+                  )}
                 </div>
                 
                 <div className="flex flex-col gap-2">
@@ -476,9 +491,16 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
 
             {/* Sintomas */}
             <div className="glass-card p-5 bg-[#1a1a1f] border-white/5 flex flex-col gap-4">
-              <div className="flex items-center gap-2 text-brand-gold">
-                <Activity className="w-4 h-4" />
-                <span className="text-sm font-semibold uppercase tracking-wider">Efeitos Colaterais / Sintomas</span>
+              <div className="flex items-center justify-between text-brand-gold">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4" />
+                  <span className="text-sm font-semibold uppercase tracking-wider">Efeitos Colaterais / Sintomas</span>
+                </div>
+                {!readOnly && (
+                  <button onClick={saveDay} disabled={saving} className="px-4 py-1.5 bg-brand-gold/20 text-brand-gold rounded-lg text-xs font-bold hover:bg-brand-gold/30 transition-all flex items-center gap-2 disabled:opacity-50">
+                    {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Registrar'}
+                  </button>
+                )}
               </div>
               
               <div className="flex flex-wrap gap-2">
@@ -504,9 +526,16 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
 
             {/* Notas */}
             <div className="glass-card p-5 bg-[#1a1a1f] border-white/5 flex flex-col gap-3">
-              <div className="flex items-center gap-2 text-brand-gray">
-                <FileText className="w-4 h-4" />
-                <span className="text-sm font-semibold uppercase tracking-wider">Notas do Dia</span>
+              <div className="flex items-center justify-between text-brand-gray">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  <span className="text-sm font-semibold uppercase tracking-wider">Notas do Dia</span>
+                </div>
+                {!readOnly && (
+                  <button onClick={saveDay} disabled={saving} className="px-4 py-1.5 bg-white/10 text-white rounded-lg text-xs font-bold hover:bg-white/20 transition-all flex items-center gap-2 disabled:opacity-50">
+                    {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Registrar'}
+                  </button>
+                )}
               </div>
               <textarea 
                 value={dayData.notas}
@@ -517,16 +546,7 @@ export function Journey({ currentUser, patientId, readOnly = false }) {
               ></textarea>
             </div>
 
-            {/* Save Button */}
-            {!readOnly && (
-              <button 
-                onClick={saveDay}
-                disabled={saving}
-                className="w-full py-4 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-all shadow-xl disabled:opacity-50 flex justify-center items-center"
-              >
-                {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Salvar Registros'}
-              </button>
-            )}
+
             </>
             ) : (
               <div className="flex-1 flex items-center justify-center py-20 opacity-50">
